@@ -192,14 +192,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         return await res.json();
     };
-
-    // getResource('http://localhost:3000/menu')
-    //     .then(data => {
-    //         data.forEach(({img, altimg, title, descr, price}) => {
-    //             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-    //         });
-    //     });
-    
+ 
     axios.get('http://localhost:3000/menu')
         .then(data => {
             data.data.forEach(({img, altimg, title, descr, price}) => {
@@ -287,9 +280,24 @@ window.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
+    function renderDotStyle() {
+        dots.forEach(dot => dot.style.opacity = '.5');
+        dots[slideIndex - 1].style.opacity = 1;
+    }
+
+    function renderNumberStyle() {
+        if (slides.length < 10) {
+            current.textContent = `0${slideIndex}`;
+        } else {
+            current.textContent = slideIndex;
+        }
+    }
+
     // Slider
 
     const slides = document.querySelectorAll('.offer__slide'),
+        dots = [],
+        slider = document.querySelector('.offer__slider'),
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
         total = document.querySelector('#total'),
@@ -319,6 +327,23 @@ window.addEventListener('DOMContentLoaded', () => {
         slide.style.width = width;
     });
 
+    slider.style.position = 'relative';
+
+    const indicators = document.createElement('ol');
+    indicators.classList.add('carousel-indicators');
+    slider.append(indicators);
+
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('li');
+        dot.classList.add('dot');
+        dot.setAttribute('data-slide-to', i + 1);
+        if (i == 0) {
+            dot.style.opacity = 1;
+        }
+        indicators.append(dot);
+        dots.push(dot);
+    }
+
     next.addEventListener('click', () => {
         if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)) {
             offset = 0;
@@ -334,11 +359,9 @@ window.addEventListener('DOMContentLoaded', () => {
             slideIndex++;
         }
     
-        if (slides.length < 10) {
-            current.textContent = `0${slideIndex}`;
-        } else {
-            current.textContent = slideIndex;
-        }
+        renderNumberStyle();
+        
+        renderDotStyle();
     });
 
     prev.addEventListener('click', () => {
@@ -356,48 +379,23 @@ window.addEventListener('DOMContentLoaded', () => {
             slideIndex--;
         }
     
-        if (slides.length < 10) {
-            current.textContent = `0${slideIndex}`;
-        } else {
-            current.textContent = slideIndex;
-        }
+        renderNumberStyle();
+
+        renderDotStyle();
     });
 
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to');
 
+            slideIndex = slideTo;
+            offset = +width.slice(0, width.length - 2) * (slideTo - 1);
 
-    // showSlides(slideIndex);
+            slidesField.style.transform = `translateX(-${offset}px)`;
 
+            renderNumberStyle();
 
-
-    // function showSlides(n) {
-    //     if (n > slides.length) {
-    //         slideIndex = 1;
-    //     }
-
-    //     if (n < 1) {
-    //         slideIndex = slides.length;
-    //     }
-
-    //     slides.forEach(item => item.style.display = 'none');
-
-    //     slides[slideIndex - 1].style.display = 'block';
-
-    //     if (slideIndex < 10) {
-    //         current.textContent = `0${slideIndex}`;
-    //         total.textContent = slideIndex;
-    //     }
-    // }
-
-    // function plusSlides(n) {
-    //     showSlides(slideIndex += n);
-    // }
-
-    // prev.addEventListener('click', () => {
-    //     plusSlides(-1);
-    // });
-
-    // next.addEventListener('click', () => {
-    //     plusSlides(1);
-    // });
-
+            renderDotStyle();
+        });
+    });
 });
